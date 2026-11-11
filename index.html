@@ -1,0 +1,763 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="disabled-adaptations" content="watch">
+<meta name="theme-color" content="#0d0f12">
+<title>Physik</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%237cc4ff'/%3E%3Ccircle cx='32' cy='32' r='17' fill='none' stroke='%230d0f12' stroke-width='5'/%3E%3Ccircle cx='49' cy='32' r='6' fill='%230d0f12'/%3E%3C/svg%3E">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0d0f12;
+    --panel: #181b20;
+    --panel2: #20242b;
+    --line: #2a2f37;
+    --ink: #f2f2ee;
+    --muted: #8d939c;
+    --acc: #7cc4ff;
+    --gold: #e8a33d;
+    --green: #6ad19a;
+    --red: #ff6b5e;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; background: var(--bg); }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    font-size: 17px; line-height: 1.35;
+  }
+  .shell { max-width: 520px; margin: 0 auto; padding: 0 16px 40px; }
+  sub, sup { font-size: 0.68em; line-height: 0; }
+
+  nav.tabs {
+    position: sticky; top: 0; z-index: 5;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+    padding: 10px 0; background: var(--bg);
+  }
+  nav.tabs a {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 44px; border-radius: 12px; text-decoration: none;
+    background: var(--panel); color: var(--muted);
+    font-size: 0.9rem; font-weight: 700;
+  }
+  nav.tabs a[aria-current="true"] { background: var(--acc); color: #0d0f12; }
+
+  section[hidden] { display: none; }
+  h2 { margin: 18px 0 8px; font-size: 1.3rem; line-height: 1.15; }
+  h2:first-child { margin-top: 6px; }
+  h3 { margin: 14px 0 6px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+
+  /* Kategorien */
+  .tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .tiles a {
+    display: flex; flex-direction: column; gap: 4px; padding: 12px;
+    border-radius: 14px; background: var(--panel); color: var(--ink); text-decoration: none;
+    min-height: 96px;
+  }
+  .tiles a .i { font-size: 1.6rem; line-height: 1; }
+  .tiles a b { font-size: 1rem; line-height: 1.15; }
+  .tiles a small { color: var(--muted); font-size: 0.78rem; line-height: 1.2; }
+
+  /* Aufgabenliste */
+  .list a {
+    display: block; padding: 11px 12px; margin-bottom: 7px; border-radius: 12px;
+    background: var(--panel); color: var(--ink); text-decoration: none;
+  }
+  .list a b { display: block; font-size: 1rem; line-height: 1.2; }
+  .list a small { display: block; margin-top: 3px; color: var(--muted); font-size: 0.8rem; line-height: 1.25; }
+  .back {
+    display: inline-flex; align-items: center; gap: 4px; margin: 4px 0 2px;
+    color: var(--acc); text-decoration: none; font-weight: 700; font-size: 0.9rem;
+  }
+
+  /* Lösungskarte */
+  .card { background: var(--panel); border-radius: 14px; padding: 10px 12px; margin-bottom: 10px; }
+  .tag { color: var(--muted); font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .erk { font-size: 0.92rem; }
+  .formel { font-size: 1.35rem; font-weight: 700; color: var(--gold); line-height: 1.3; }
+  .formel + .formel { margin-top: 4px; }
+  .formel.s { font-size: 1.05rem; color: var(--ink); }
+  .idee { font-size: 0.92rem; margin-top: 6px; }
+  .inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .inputs label { display: flex; flex-direction: column; gap: 3px; font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+  .inputs input {
+    width: 100%; padding: 8px 9px; border-radius: 9px; border: 1px solid var(--line);
+    background: var(--panel2); color: var(--ink); font: inherit; font-size: 1rem; font-weight: 700;
+  }
+  .inputs input:focus { outline: 2px solid var(--acc); border-color: transparent; }
+  ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; }
+  ol.steps li {
+    counter-increment: s; display: grid; grid-template-columns: 1.6em 1fr; gap: 6px;
+    padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 0.98rem;
+  }
+  ol.steps li:last-child { border-bottom: 0; }
+  ol.steps li::before { content: counter(s) "."; color: var(--muted); font-weight: 700; }
+  .res { margin-top: 4px; padding: 10px 12px; border-radius: 12px; background: rgba(106,209,154,0.13); color: var(--green); font-weight: 800; font-size: 1.1rem; }
+  .res span { display: block; }
+  .hint { color: var(--muted); font-size: 0.85rem; }
+
+  /* Formeln */
+  .row {
+    display: grid; grid-template-columns: 40% 1fr; gap: 8px; align-items: baseline;
+    padding: 7px 0; border-bottom: 1px solid var(--line);
+  }
+  .row:last-child { border-bottom: 0; }
+  .p { color: var(--muted); font-size: 0.85rem; }
+  .f { font-weight: 700; font-size: 1.05rem; }
+  .f b { color: var(--gold); }
+  .card.rows { padding: 2px 12px; }
+  .jump { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin: 6px 0 4px; }
+  .jump a {
+    display: block; padding: 8px 2px; border-radius: 10px; background: var(--panel);
+    color: var(--ink); text-align: center; text-decoration: none; font-weight: 700; font-size: 0.78rem; line-height: 1.15;
+  }
+  [id^="f-"], [id^="w-"] { scroll-margin-top: 70px; }
+
+  /* Wissen */
+  details { background: var(--panel); border-radius: 12px; margin-bottom: 7px; }
+  details summary {
+    list-style: none; cursor: pointer; padding: 10px 12px; font-weight: 700; font-size: 0.98rem;
+    display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: "+"; color: var(--acc); font-size: 1.2rem; }
+  details[open] summary::after { content: "–"; }
+  details .a { padding: 0 12px 11px; font-size: 0.95rem; }
+  details .a ul { margin: 0; padding-left: 1.1em; }
+  details .a li { margin: 3px 0; }
+  .pdf { display: block; margin-top: 14px; padding: 12px; border-radius: 12px; background: var(--panel); color: var(--acc); text-decoration: none; font-weight: 700; text-align: center; }
+
+  @media (max-width: 230px) {
+    body { font-size: 15px; }
+    .shell { padding: 0 3px 24px; }
+    nav.tabs { gap: 3px; padding: 4px 0 6px; }
+    nav.tabs a { min-height: 34px; border-radius: 9px; font-size: 0.72rem; }
+    nav.tabs .e { display: none; }
+    h2 { margin: 10px 0 5px; font-size: 1.05rem; }
+    h3 { font-size: 0.68rem; margin: 10px 0 4px; }
+    .tiles { gap: 4px; }
+    .tiles a { padding: 7px; min-height: 0; border-radius: 10px; gap: 2px; }
+    .tiles a .i { font-size: 1.15rem; }
+    .tiles a b { font-size: 0.8rem; }
+    .tiles a small { display: none; }
+    .list a { padding: 7px 8px; margin-bottom: 5px; border-radius: 9px; }
+    .list a b { font-size: 0.86rem; }
+    .list a small { font-size: 0.68rem; }
+    .card { padding: 6px 7px; border-radius: 10px; margin-bottom: 7px; }
+    .card.rows { padding: 2px 7px; }
+    .formel { font-size: 1.05rem; }
+    .formel.s { font-size: 0.92rem; }
+    .erk, .idee { font-size: 0.82rem; }
+    .inputs { grid-template-columns: 1fr; gap: 4px; }
+    .inputs label { font-size: 0.68rem; }
+    .inputs input { padding: 4px 6px; font-size: 0.9rem; }
+    ol.steps li { font-size: 0.82rem; grid-template-columns: 1.3em 1fr; gap: 3px; padding: 5px 0; }
+    .res { font-size: 0.92rem; padding: 6px 7px; }
+    .row { grid-template-columns: 1fr; gap: 0; padding: 5px 0; }
+    .p { font-size: 0.7rem; }
+    .f { font-size: 0.95rem; }
+    .jump { grid-template-columns: repeat(2, 1fr); gap: 3px; }
+    .jump a { padding: 6px 2px; font-size: 0.68rem; border-radius: 7px; }
+    details summary { padding: 7px 8px; font-size: 0.84rem; }
+    details .a { padding: 0 8px 8px; font-size: 0.82rem; }
+  }
+</style>
+</head>
+<body>
+<main class="shell">
+  <nav class="tabs">
+    <a href="#aufgabe" data-tab="aufgabe"><span class="e">🎯 </span>Aufgabe</a>
+    <a href="#formeln" data-tab="formeln"><span class="e">∑ </span>Formeln</a>
+    <a href="#wissen" data-tab="wissen"><span class="e">💡 </span>Wissen</a>
+  </nav>
+  <section id="aufgabe"></section>
+  <section id="formeln" hidden></section>
+  <section id="wissen" hidden></section>
+</main>
+
+<script>
+// ---------- Konstanten ----------
+const G = 6.674e-11, ME = 5.97e24, RE = 6.37e6, g0 = 9.81, PI = Math.PI;
+
+// ---------- Zahlen ----------
+function fmt(x, d = 3) {
+  if (!isFinite(x)) return '–';
+  const a = Math.abs(x);
+  if (a !== 0 && (a >= 1e6 || a < 1e-2)) {
+    let e = Math.floor(Math.log10(a));
+    let m = +(x / Math.pow(10, e)).toPrecision(d);
+    if (Math.abs(m) >= 10) { m /= 10; e++; }
+    return String(m).replace('.', ',') + '·10<sup>' + e + '</sup>';
+  }
+  const s = +x.toPrecision(d);
+  const [i, f] = String(Math.abs(s)).split('.');
+  const ig = i.length > 4 ? i.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0') : i;
+  return (s < 0 ? '−' : '') + ig + (f ? ',' + f : '');
+}
+const u = (x, unit, d) => fmt(x, d) + (unit ? ' ' + unit : '');
+function parse(s) {
+  s = String(s).trim().replace(/\s/g, '').replace(/−/g, '-').replace(',', '.')
+    .replace(/[·x*]10\^?/i, 'e');
+  const n = Number(s);
+  return isFinite(n) ? n : NaN;
+}
+
+// ---------- Aufgabentypen ----------
+const KATS = [
+  { id: 'dreh', i: '🔄', t: 'Drehen', s: 'Umdrehungen, T, f, ω, Tempo auf der Kreisbahn' },
+  { id: 'kraft', i: '🚗', t: 'Kurve & Kraft', s: 'Zentripetalkraft, Kurve, Faden' },
+  { id: 'loop', i: '🎢', t: 'Looping', s: 'Senkrechter Kreis, oben / unten' },
+  { id: 'grav', i: '🌍', t: 'Gravitation', s: 'Massen ziehen sich an, g, Planetenmasse' },
+  { id: 'sat', i: '🛰️', t: 'Satellit', s: 'Umlaufbahn, geostationär, Höhe' },
+  { id: 'was', i: '⚖️', t: 'Was passiert, wenn …', s: 'Verdoppeln, halbieren, ohne Rechnen' }
+];
+
+const TYPES = [
+  // ---- Drehen ----
+  { id: 'umdrehungen', k: 'dreh', t: 'Umlaufzeit, Frequenz, ω',
+    erk: '„n Umdrehungen in t Sekunden“, „Drehzahl in U/min“, „wie lange dauert eine Runde?“',
+    f: ['T = t / n', 'f = 1/T', 'ω = 2π/T'],
+    idee: 'T = Zeit für <b>eine</b> Runde. U/min → durch 60 teilen = f in Hz.',
+    in: [['n', 'Umdrehungen n', '', 12], ['t', 'Zeit t', 's', 60]],
+    solve: v => {
+      const T = v.t / v.n, f = 1 / T, w = 2 * PI / T;
+      return { steps: [
+        `T = t/n = ${u(v.t, 's')} / ${fmt(v.n)} = <b>${u(T, 's')}</b>`,
+        `f = 1/T = 1/${u(T, 's')} = <b>${u(f, 'Hz')}</b>`,
+        `ω = 2π/T = 2π/${u(T, 's')} = <b>${u(w, '1/s')}</b>`
+      ], res: [`T = ${u(T, 's')}`, `f = ${u(f, 'Hz')}`, `ω = ${u(w, '1/s')}`] };
+    } },
+  { id: 'bahngeschw', k: 'dreh', t: 'Bahngeschwindigkeit v',
+    erk: '„Wie schnell bewegt sich ein Punkt am Rand / ein Fahrgast?“ – Radius und Umlaufzeit gegeben',
+    f: ['v = 2πr / T', 'v = ω · r'],
+    idee: 'Eine Runde = Kreisumfang 2πr in der Zeit T.',
+    in: [['r', 'Radius r', 'm', 4], ['T', 'Umlaufzeit T', 's', 5]],
+    solve: v => {
+      const vv = 2 * PI * v.r / v.T, w = 2 * PI / v.T;
+      return { steps: [
+        `Umfang s = 2πr = 2π · ${u(v.r, 'm')} = ${u(2 * PI * v.r, 'm')}`,
+        `v = 2πr/T = ${u(2 * PI * v.r, 'm')} / ${u(v.T, 's')} = <b>${u(vv, 'm/s')}</b>`,
+        `In km/h: · 3,6 = ${u(vv * 3.6, 'km/h')}`,
+        `Kontrolle: ω = 2π/T = ${u(w, '1/s')}; ω·r = ${u(w * v.r, 'm/s')} ✓`
+      ], res: [`v = ${u(vv, 'm/s')} = ${u(vv * 3.6, 'km/h')}`] };
+    } },
+  { id: 'omega-v-r', k: 'dreh', t: 'ω, v oder r gesucht',
+    erk: 'Zwei der drei Größen v, ω, r sind gegeben, die dritte ist gesucht',
+    f: ['v = ω · r', 'ω = v / r', 'r = v / ω'],
+    idee: 'Danach folgt T = 2π/ω.',
+    in: [['v', 'Bahngeschw. v', 'm/s', 5], ['r', 'Radius r', 'm', 2]],
+    solve: v => {
+      const w = v.v / v.r, T = 2 * PI / w;
+      return { steps: [
+        `ω = v/r = ${u(v.v, 'm/s')} / ${u(v.r, 'm')} = <b>${u(w, '1/s')}</b>`,
+        `T = 2π/ω = 2π / ${u(w, '1/s')} = <b>${u(T, 's')}</b>`,
+        `f = 1/T = ${u(1 / T, 'Hz')}`
+      ], res: [`ω = ${u(w, '1/s')}`, `T = ${u(T, 's')}`] };
+    } },
+  { id: 'zwei-punkte', k: 'dreh', t: 'Zwei Punkte auf derselben Scheibe',
+    erk: 'Karussell innen/außen, CD, Rad: „Welcher Punkt ist schneller?“',
+    f: ['ω₁ = ω₂ (gleiche Scheibe)', 'v = ω · r → v ∼ r'],
+    idee: 'Gleiche Umlaufzeit für alle Punkte. Doppelter Radius → doppelte Bahngeschwindigkeit.',
+    in: [['r1', 'Radius innen r₁', 'm', 2], ['r2', 'Radius außen r₂', 'm', 4], ['T', 'Umlaufzeit T', 's', 5]],
+    solve: v => {
+      const w = 2 * PI / v.T, v1 = w * v.r1, v2 = w * v.r2;
+      return { steps: [
+        `ω = 2π/T = ${u(w, '1/s')} – gilt für beide Punkte`,
+        `v₁ = ω · r₁ = ${u(w, '1/s')} · ${u(v.r1, 'm')} = <b>${u(v1, 'm/s')}</b>`,
+        `v₂ = ω · r₂ = ${u(w, '1/s')} · ${u(v.r2, 'm')} = <b>${u(v2, 'm/s')}</b>`,
+        `v₂/v₁ = r₂/r₁ = ${fmt(v.r2 / v.r1)}`
+      ], res: [`v₁ = ${u(v1, 'm/s')}`, `v₂ = ${u(v2, 'm/s')}`, `ω gleich: ${u(w, '1/s')}`] };
+    } },
+  { id: 'erde-dreht', k: 'dreh', t: 'Punkt auf der rotierenden Erde',
+    erk: '„Wie schnell bewegt sich ein Punkt am Äquator / in München?“',
+    f: ['r = R<sub>E</sub> · cos φ', 'v = 2πr / T', 'T = 24 h = 86 400 s'],
+    idee: 'φ = geografische Breite. Am Äquator φ = 0° → r = R<sub>E</sub> = 6370 km; am Pol v = 0.',
+    in: [['phi', 'Breite φ', '°', 0]],
+    solve: v => {
+      const r = RE * Math.cos(v.phi * PI / 180), vv = 2 * PI * r / 86400;
+      return { steps: [
+        `r = R<sub>E</sub> · cos ${fmt(v.phi)}° = 6,37·10<sup>6</sup> m · ${fmt(Math.cos(v.phi * PI / 180))} = ${u(r, 'm')}`,
+        `v = 2πr/T = 2π · ${u(r, 'm')} / 86 400 s = <b>${u(vv, 'm/s')}</b>`,
+        `= ${u(vv * 3.6, 'km/h')}`,
+        `ω = 2π/T = 7,27·10<sup>−5</sup> 1/s (überall gleich)`
+      ], res: [`v = ${u(vv, 'm/s')} = ${u(vv * 3.6, 'km/h')}`] };
+    } },
+
+  // ---- Kurve & Kraft ----
+  { id: 'fzp-v', k: 'kraft', t: 'Zentripetalkraft aus v',
+    erk: 'Masse, Geschwindigkeit und Radius gegeben: „Welche Kraft ist nötig, damit … auf der Kreisbahn bleibt?“',
+    f: ['F<sub>zp</sub> = m · v² / r', 'a<sub>zp</sub> = v² / r'],
+    idee: 'km/h erst ÷ 3,6 in m/s umrechnen! F<sub>zp</sub> zeigt zum Kreismittelpunkt.',
+    in: [['m', 'Masse m', 'kg', 1200], ['vk', 'Tempo v', 'km/h', 72], ['r', 'Radius r', 'm', 50]],
+    solve: v => {
+      const vv = v.vk / 3.6, F = v.m * vv * vv / v.r;
+      return { steps: [
+        `v = ${u(v.vk, 'km/h')} ÷ 3,6 = ${u(vv, 'm/s')}`,
+        `F<sub>zp</sub> = m·v²/r = ${u(v.m, 'kg')} · (${u(vv, 'm/s')})² / ${u(v.r, 'm')} = <b>${u(F, 'N')}</b>`,
+        `a<sub>zp</sub> = v²/r = ${u(vv * vv / v.r, 'm/s²')}`
+      ], res: [`F<sub>zp</sub> = ${u(F, 'N')}`, `a<sub>zp</sub> = ${u(vv * vv / v.r, 'm/s²')}`] };
+    } },
+  { id: 'fzp-t', k: 'kraft', t: 'Zentripetalkraft aus Umlaufzeit',
+    erk: 'Kettenkarussell, Zentrifuge, Hammerwerfer: Umlaufzeit oder Drehzahl statt Tempo gegeben',
+    f: ['ω = 2π / T', 'F<sub>zp</sub> = m · ω² · r'],
+    idee: 'Erst ω ausrechnen, dann einsetzen.',
+    in: [['m', 'Masse m', 'kg', 60], ['r', 'Radius r', 'm', 5], ['T', 'Umlaufzeit T', 's', 4]],
+    solve: v => {
+      const w = 2 * PI / v.T, F = v.m * w * w * v.r;
+      return { steps: [
+        `ω = 2π/T = 2π / ${u(v.T, 's')} = ${u(w, '1/s')}`,
+        `F<sub>zp</sub> = m·ω²·r = ${u(v.m, 'kg')} · (${u(w, '1/s')})² · ${u(v.r, 'm')} = <b>${u(F, 'N')}</b>`,
+        `Tempo: v = ω·r = ${u(w * v.r, 'm/s')}`
+      ], res: [`F<sub>zp</sub> = ${u(F, 'N')}`] };
+    } },
+  { id: 'kurve', k: 'kraft', t: 'Höchsttempo in der Kurve',
+    erk: '„Wie schnell darf das Auto höchstens durch die Kurve fahren?“ – Haftreibungszahl μ gegeben',
+    f: ['F<sub>R</sub> = μ · m · g', 'm·v²/r = μ·m·g', 'v<sub>max</sub> = √(μ · g · r)'],
+    idee: 'Haftreibung liefert die Zentripetalkraft. Die Masse kürzt sich weg!',
+    in: [['mu', 'Haftreibung μ', '', 0.8], ['r', 'Radius r', 'm', 50]],
+    solve: v => {
+      const vv = Math.sqrt(v.mu * g0 * v.r);
+      return { steps: [
+        `Ansatz: F<sub>zp</sub> = F<sub>R</sub> → m·v²/r = μ·m·g`,
+        `m kürzen: v² = μ·g·r = ${fmt(v.mu)} · 9,81 m/s² · ${u(v.r, 'm')} = ${u(vv * vv, 'm²/s²')}`,
+        `v<sub>max</sub> = √(${fmt(vv * vv)}) = <b>${u(vv, 'm/s')}</b> = ${u(vv * 3.6, 'km/h')}`
+      ], res: [`v<sub>max</sub> = ${u(vv, 'm/s')} = ${u(vv * 3.6, 'km/h')}`] };
+    } },
+  { id: 'faden', k: 'kraft', t: 'Faden reißt – Höchsttempo',
+    erk: '„Der Faden hält höchstens F … Wie schnell darf der Körper kreisen?“ (waagrecht)',
+    f: ['F<sub>Faden</sub> = F<sub>zp</sub> = m·v²/r', 'v<sub>max</sub> = √(F<sub>max</sub> · r / m)'],
+    idee: 'Reißt der Faden, fliegt der Körper tangential (geradeaus) weiter.',
+    in: [['m', 'Masse m', 'kg', 0.5], ['r', 'Fadenlänge r', 'm', 0.8], ['F', 'Reißkraft F<sub>max</sub>', 'N', 50]],
+    solve: v => {
+      const vv = Math.sqrt(v.F * v.r / v.m), T = 2 * PI * v.r / vv;
+      return { steps: [
+        `Ansatz: F<sub>max</sub> = m·v²/r → v² = F·r/m`,
+        `v² = ${u(v.F, 'N')} · ${u(v.r, 'm')} / ${u(v.m, 'kg')} = ${u(vv * vv, 'm²/s²')}`,
+        `v<sub>max</sub> = <b>${u(vv, 'm/s')}</b>`,
+        `Kürzeste Umlaufzeit T = 2πr/v = ${u(T, 's')}`
+      ], res: [`v<sub>max</sub> = ${u(vv, 'm/s')}`, `T<sub>min</sub> = ${u(T, 's')}`] };
+    } },
+  { id: 'radius', k: 'kraft', t: 'Radius oder Masse gesucht',
+    erk: 'F<sub>zp</sub> ist gegeben, gesucht ist r („Wie eng darf die Kurve sein?“) oder m',
+    f: ['r = m · v² / F<sub>zp</sub>', 'm = F<sub>zp</sub> · r / v²', 'v = √(F<sub>zp</sub> · r / m)'],
+    idee: 'Immer aus F<sub>zp</sub> = m·v²/r umstellen.',
+    in: [['m', 'Masse m', 'kg', 1200], ['v', 'Tempo v', 'm/s', 20], ['F', 'Kraft F<sub>zp</sub>', 'N', 9600]],
+    solve: v => {
+      const r = v.m * v.v * v.v / v.F;
+      return { steps: [
+        `F = m·v²/r  | · r, ÷ F`,
+        `r = m·v²/F = ${u(v.m, 'kg')} · (${u(v.v, 'm/s')})² / ${u(v.F, 'N')} = <b>${u(r, 'm')}</b>`
+      ], res: [`r = ${u(r, 'm')}`] };
+    } },
+
+  // ---- Looping ----
+  { id: 'loop-min', k: 'loop', t: 'Mindesttempo oben im Looping',
+    erk: '„Wie schnell muss der Wagen / der Eimer oben mindestens sein, damit er nicht herunterfällt?“',
+    f: ['oben: m · g = m · v² / r', 'v<sub>min</sub> = √(g · r)'],
+    idee: 'Grenzfall oben: Die Gewichtskraft allein liefert die Zentripetalkraft. Masse kürzt sich.',
+    in: [['r', 'Radius r', 'm', 10]],
+    solve: v => {
+      const vv = Math.sqrt(g0 * v.r);
+      return { steps: [
+        `Ansatz oben: F<sub>G</sub> = F<sub>zp</sub> → m·g = m·v²/r`,
+        `v² = g·r = 9,81 m/s² · ${u(v.r, 'm')} = ${u(vv * vv, 'm²/s²')}`,
+        `v<sub>min</sub> = <b>${u(vv, 'm/s')}</b> = ${u(vv * 3.6, 'km/h')}`
+      ], res: [`v<sub>min</sub> = ${u(vv, 'm/s')} = ${u(vv * 3.6, 'km/h')}`] };
+    } },
+  { id: 'loop-kraft', k: 'loop', t: 'Kraft oben und unten (Faden, Sitz)',
+    erk: 'Stein am Faden im senkrechten Kreis, Looping-Sitz: „Wo ist die Fadenkraft am größten?“',
+    f: ['oben: F = m·v²/r − m·g', 'unten: F = m·v²/r + m·g'],
+    idee: 'Oben hilft die Gewichtskraft mit, unten muss Faden/Sitz sie zusätzlich tragen → unten größte Kraft, dort reißt der Faden.',
+    in: [['m', 'Masse m', 'kg', 0.2], ['v', 'Tempo v', 'm/s', 4], ['r', 'Radius r', 'm', 0.5]],
+    solve: v => {
+      const zp = v.m * v.v * v.v / v.r, G_ = v.m * g0;
+      return { steps: [
+        `F<sub>zp</sub> = m·v²/r = ${u(v.m, 'kg')} · (${u(v.v, 'm/s')})² / ${u(v.r, 'm')} = ${u(zp, 'N')}`,
+        `F<sub>G</sub> = m·g = ${u(v.m, 'kg')} · 9,81 m/s² = ${u(G_, 'N')}`,
+        `oben: F = ${u(zp, 'N')} − ${u(G_, 'N')} = <b>${u(zp - G_, 'N')}</b>`,
+        `unten: F = ${u(zp, 'N')} + ${u(G_, 'N')} = <b>${u(zp + G_, 'N')}</b>`,
+        zp - G_ < 0 ? 'Oben negativ → zu langsam, Faden wird schlaff' : 'Oben positiv → Faden bleibt gespannt'
+      ], res: [`oben: ${u(zp - G_, 'N')}`, `unten: ${u(zp + G_, 'N')}`] };
+    } },
+
+  // ---- Gravitation ----
+  { id: 'fg', k: 'grav', t: 'Gravitationskraft zwischen zwei Massen',
+    erk: '„Mit welcher Kraft ziehen sich Erde und Mond / zwei Körper an?“',
+    f: ['F<sub>G</sub> = G · m₁ · m₂ / r²', 'G = 6,674·10<sup>−11</sup> m³/(kg·s²)'],
+    idee: 'r = Abstand der <b>Schwerpunkte</b> (Mittelpunkte) in m. Beide Körper spüren gleich große Kraft. Eingabe z. B. 5,97e24.',
+    in: [['m1', 'Masse m₁', 'kg', '5,97e24'], ['m2', 'Masse m₂', 'kg', '7,35e22'], ['r', 'Abstand r', 'm', '3,84e8']],
+    solve: v => {
+      const F = G * v.m1 * v.m2 / (v.r * v.r);
+      return { steps: [
+        `F<sub>G</sub> = G·m₁·m₂/r²`,
+        `= 6,674·10<sup>−11</sup> · ${fmt(v.m1)} · ${fmt(v.m2)} / (${fmt(v.r)})²`,
+        `= <b>${u(F, 'N')}</b>`
+      ], res: [`F<sub>G</sub> = ${u(F, 'N')}`] };
+    } },
+  { id: 'g-hoehe', k: 'grav', t: 'g und Gewichtskraft in der Höhe',
+    erk: '„Wie groß ist die Gewichtskraft / Fallbeschleunigung in h km Höhe?“',
+    f: ['g = G · M<sub>E</sub> / r²', 'r = R<sub>E</sub> + h', 'F<sub>G</sub> = m · g'],
+    idee: 'Am Boden r = R<sub>E</sub> = 6370 km → g ≈ 9,81 m/s². Höher → g kleiner.',
+    in: [['h', 'Höhe h', 'km', 400], ['m', 'Masse m', 'kg', 70]],
+    solve: v => {
+      const r = RE + v.h * 1000, gg = G * ME / (r * r);
+      return { steps: [
+        `r = R<sub>E</sub> + h = 6370 km + ${u(v.h, 'km')} = ${u(r, 'm')}`,
+        `g = G·M<sub>E</sub>/r² = 6,674·10<sup>−11</sup> · 5,97·10<sup>24</sup> / (${fmt(r)})² = <b>${u(gg, 'm/s²')}</b>`,
+        `F<sub>G</sub> = m·g = ${u(v.m, 'kg')} · ${u(gg, 'm/s²')} = <b>${u(v.m * gg, 'N')}</b>`,
+        `(am Boden: ${u(v.m * g0, 'N')})`
+      ], res: [`g = ${u(gg, 'm/s²')}`, `F<sub>G</sub> = ${u(v.m * gg, 'N')}`] };
+    } },
+  { id: 'masse-umlauf', k: 'grav', t: 'Masse eines Planeten aus einem Umlauf',
+    erk: '„Bestimme die Masse der Erde/Sonne/des Jupiter“ – Bahnradius r und Umlaufzeit T eines Mondes gegeben',
+    f: ['F<sub>G</sub> = F<sub>zp</sub>', 'G·M·m/r² = m·(2π/T)²·r', 'M = 4π² · r³ / (G · T²)'],
+    idee: 'Die Masse des umkreisenden Körpers kürzt sich. T in Sekunden!',
+    in: [['r', 'Bahnradius r', 'm', '3,84e8'], ['Td', 'Umlaufzeit T', 'Tage', 27.32]],
+    solve: v => {
+      const T = v.Td * 86400, M = 4 * PI * PI * Math.pow(v.r, 3) / (G * T * T);
+      return { steps: [
+        `T = ${fmt(v.Td, 4)} d · 86 400 s = ${u(T, 's')}`,
+        `Ansatz: G·M·m/r² = m·ω²·r mit ω = 2π/T → m kürzen`,
+        `M = 4π²·r³/(G·T²) = 4π² · (${fmt(v.r)})³ / (6,674·10<sup>−11</sup> · (${fmt(T)})²)`,
+        `M = <b>${u(M, 'kg')}</b>`
+      ], res: [`M = ${u(M, 'kg')}`] };
+    } },
+  { id: 'masse-g', k: 'grav', t: 'Masse eines Planeten aus g und Radius',
+    erk: 'Fallbeschleunigung an der Oberfläche und Planetenradius gegeben',
+    f: ['m · g = G · m · M / R²', 'M = g · R² / G'],
+    idee: 'Gewichtskraft = Gravitationskraft der Erde.',
+    in: [['g', 'Fallbeschl. g', 'm/s²', 9.81], ['R', 'Radius R', 'km', 6370]],
+    solve: v => {
+      const R = v.R * 1000, M = v.g * R * R / G;
+      return { steps: [
+        `R = ${u(v.R, 'km')} = ${u(R, 'm')}`,
+        `M = g·R²/G = ${u(v.g, 'm/s²')} · (${fmt(R)})² / 6,674·10<sup>−11</sup>`,
+        `M = <b>${u(M, 'kg')}</b>`
+      ], res: [`M = ${u(M, 'kg')}`] };
+    } },
+  { id: 'abstand', k: 'grav', t: 'Abstand gesucht',
+    erk: 'Kraft und beide Massen gegeben: „In welchem Abstand ist F<sub>G</sub> = …?“',
+    f: ['r = √(G · m₁ · m₂ / F<sub>G</sub>)', 'm₁ = F<sub>G</sub> · r² / (G · m₂)'],
+    idee: 'Abstand vom Mittelpunkt; Höhe über der Oberfläche: h = r − R.',
+    in: [['m1', 'Masse m₁', 'kg', '5,97e24'], ['m2', 'Masse m₂', 'kg', 70], ['F', 'Kraft F<sub>G</sub>', 'N', 500]],
+    solve: v => {
+      const r = Math.sqrt(G * v.m1 * v.m2 / v.F);
+      return { steps: [
+        `r = √(G·m₁·m₂/F) = √(6,674·10<sup>−11</sup> · ${fmt(v.m1)} · ${fmt(v.m2)} / ${fmt(v.F)})`,
+        `r = <b>${u(r, 'm')}</b> = ${u(r / 1000, 'km')}`,
+        `Falls m₁ = Erde: Höhe h = r − R<sub>E</sub> = ${u((r - RE) / 1000, 'km')}`
+      ], res: [`r = ${u(r / 1000, 'km')}`] };
+    } },
+  { id: 'gleichgewicht', k: 'grav', t: 'Punkt zwischen Erde und Mond, wo F<sub>G</sub> sich aufhebt',
+    erk: '„Wo ist ein Körper zwischen Erde und Mond kräftefrei?“',
+    f: ['G·M<sub>E</sub>/x² = G·m<sub>M</sub>/(d − x)²', 'x = d / (1 + √(m<sub>M</sub>/M<sub>E</sub>))'],
+    idee: 'x = Abstand vom Erdmittelpunkt, d = Abstand Erde–Mond. Liegt nah am Mond.',
+    in: [['d', 'Abstand d', 'm', '3,84e8']],
+    solve: v => {
+      const q = Math.sqrt(7.35e22 / ME), x = v.d / (1 + q);
+      return { steps: [
+        `Ansatz: Anziehung der Erde = Anziehung des Mondes, G und m kürzen`,
+        `Wurzel ziehen: (d − x)/x = √(m<sub>M</sub>/M<sub>E</sub>) = √(7,35·10<sup>22</sup>/5,97·10<sup>24</sup>) = ${fmt(q)}`,
+        `x = d/(1 + ${fmt(q)}) = <b>${u(x, 'm')}</b> = ${u(x / 1000, 'km')} vom Erdmittelpunkt`,
+        `Abstand zum Mond: ${u((v.d - x) / 1000, 'km')}`
+      ], res: [`x = ${u(x / 1000, 'km')} von der Erde`] };
+    } },
+  { id: 'sonne-mond', k: 'grav', t: 'Sonne oder Erde: wer zieht stärker am Mond?',
+    erk: 'Vergleich zweier Gravitationskräfte auf denselben Körper (Verhältnis)',
+    f: ['F<sub>SM</sub> / F<sub>EM</sub> = (m<sub>S</sub> · r<sub>EM</sub>²) / (m<sub>E</sub> · r<sub>SM</sub>²)'],
+    idee: 'Als Bruch aufschreiben: G und m<sub>Mond</sub> kürzen sich.',
+    in: [['mS', 'm Sonne', 'kg', '1,99e30'], ['rSM', 'r Sonne–Mond', 'm', '1,496e11'], ['rEM', 'r Erde–Mond', 'm', '3,84e8']],
+    solve: v => {
+      const q = v.mS * v.rEM * v.rEM / (ME * v.rSM * v.rSM);
+      return { steps: [
+        `F<sub>SM</sub>/F<sub>EM</sub> = (G·m<sub>M</sub>·m<sub>S</sub>/r<sub>SM</sub>²) / (G·m<sub>M</sub>·m<sub>E</sub>/r<sub>EM</sub>²)`,
+        `= m<sub>S</sub>·r<sub>EM</sub>² / (m<sub>E</sub>·r<sub>SM</sub>²) = ${fmt(v.mS)} · (${fmt(v.rEM)})² / (5,97·10<sup>24</sup> · (${fmt(v.rSM)})²)`,
+        `= <b>${fmt(q, 2)}</b>`,
+        `Die Sonne zieht ca. doppelt so stark am Mond wie die Erde.`
+      ], res: [`F<sub>SM</sub> ≈ ${fmt(q, 2)} · F<sub>EM</sub>`] };
+    } },
+
+  // ---- Satellit ----
+  { id: 'sat-hoehe', k: 'sat', t: 'Satellit in Höhe h: Tempo und Umlaufzeit',
+    erk: '„Ein Satellit / die ISS kreist in h km Höhe. Berechne v und T.“',
+    f: ['F<sub>G</sub> = F<sub>zp</sub>: G·M<sub>E</sub>·m/r² = m·v²/r', 'v = √(G · M<sub>E</sub> / r)', 'T = 2πr / v'],
+    idee: 'r = R<sub>E</sub> + h, <b>nicht</b> nur h! Satellitenmasse kürzt sich.',
+    in: [['h', 'Höhe h', 'km', 400]],
+    solve: v => {
+      const r = RE + v.h * 1000, vv = Math.sqrt(G * ME / r), T = 2 * PI * r / vv;
+      return { steps: [
+        `r = R<sub>E</sub> + h = 6370 km + ${u(v.h, 'km')} = ${u(r, 'm')}`,
+        `v = √(G·M<sub>E</sub>/r) = √(6,674·10<sup>−11</sup> · 5,97·10<sup>24</sup> / ${fmt(r)}) = <b>${u(vv, 'm/s')}</b>`,
+        `T = 2πr/v = 2π · ${fmt(r)} m / ${u(vv, 'm/s')} = ${u(T, 's')} = <b>${u(T / 60, 'min')}</b>`
+      ], res: [`v = ${u(vv / 1000, 'km/s')}`, `T = ${u(T / 60, 'min')}`] };
+    } },
+  { id: 'geo', k: 'sat', t: 'Geostationär / Bahnradius aus Umlaufzeit',
+    erk: '„Satellit steht immer über demselben Punkt“ oder „Umlaufzeit T gegeben – in welcher Höhe kreist er?“',
+    f: ['m·ω²·r = G·M<sub>E</sub>·m/r²', 'r = ∛(G · M<sub>E</sub> / ω²)', 'h = r − R<sub>E</sub>'],
+    idee: 'Geostationär: T = 24 h, gleiche Drehrichtung wie die Erde, über dem Äquator.',
+    in: [['Th', 'Umlaufzeit T', 'h', 24]],
+    solve: v => {
+      const T = v.Th * 3600, w = 2 * PI / T, r = Math.cbrt(G * ME / (w * w)), vv = w * r;
+      const rk = +(r / 1000).toPrecision(3), hk = rk - 6370;
+      return { steps: [
+        `ω = 2π/T = 2π / ${u(T, 's')} = ${u(w, '1/s')}`,
+        `r = ∛(G·M<sub>E</sub>/ω²) = ∛(6,674·10<sup>−11</sup> · 5,97·10<sup>24</sup> / (${fmt(w)})²) = <b>${u(r / 1000, 'km')}</b>`,
+        `h = r − R<sub>E</sub> = ${u(rk, 'km')} − 6370 km = <b>${u(hk, 'km')}</b>`,
+        `v = ω·r = ${u(vv / 1000, 'km/s')}`
+      ], res: [`r = ${u(rk, 'km')}`, `h = ${u(hk, 'km')}`, `v = ${u(vv / 1000, 'km/s')}`] };
+    } }
+];
+
+const WAS = [
+  ['v verdoppelt (r fest)', 'F<sub>zp</sub> 4-fach (F ∼ v²)'],
+  ['m verdoppelt', 'F<sub>zp</sub> doppelt (F ∼ m)'],
+  ['r verdoppelt, v gleich', 'F<sub>zp</sub> halb (F ∼ 1/r)'],
+  ['r verdoppelt, ω gleich', 'F<sub>zp</sub> doppelt (F ∼ r), v doppelt'],
+  ['T halbiert (doppelt so schnell drehen)', 'ω doppelt → F<sub>zp</sub> 4-fach'],
+  ['Abstand verdoppelt', 'F<sub>G</sub> = ¼'],
+  ['Abstand verdreifacht', 'F<sub>G</sub> = 1/9'],
+  ['Abstand halbiert', 'F<sub>G</sub> 4-fach'],
+  ['eine Masse verdoppelt', 'F<sub>G</sub> doppelt'],
+  ['beide Massen verdoppelt', 'F<sub>G</sub> 4-fach'],
+  ['Satellit höher (r größer)', 'v kleiner, T größer, g kleiner'],
+  ['Satellit schwerer', 'v und T bleiben gleich (m kürzt sich)'],
+  ['Auto schwerer (Kurve)', 'v<sub>max</sub> bleibt gleich (m kürzt sich)'],
+  ['Kurvenradius 4-fach', 'v<sub>max</sub> doppelt (v ∼ √r)'],
+  ['Faden reißt', 'Körper fliegt tangential geradeaus weiter']
+];
+
+// ---------- Formeln ----------
+const FORMELN = [
+  ['f-kreis', 'Kreisbewegung', [
+    ['Umlaufzeit T', 'Zeit für 1 Runde [s]'],
+    ['Frequenz', '<b>f = 1/T</b> [Hz]'],
+    ['Kreisumfang', '<b>s = 2πr</b>'],
+    ['Winkelgeschw.', '<b>ω = Δφ/Δt = 2π/T</b> [1/s]'],
+    ['Bahngeschw.', '<b>v = 2πr/T = ω·r</b> [m/s]'],
+    ['Umstellen', 'ω = v/r  |  r = v/ω  |  T = 2πr/v'],
+    ['Winkel', '360° = 2π rad'],
+    ['gleiches ω', 'größeres r → größeres v'],
+    ['gleiches r', 'größeres ω → größeres v']
+  ]],
+  ['f-zp', 'Zentripetalkraft', [
+    ['Beschleunigung', '<b>a<sub>zp</sub> = v²/r = ω²·r</b> [m/s²]'],
+    ['Kraft', '<b>F<sub>zp</sub> = m·v²/r = m·ω²·r</b> [N]'],
+    ['v gesucht', 'v = √(F·r/m)'],
+    ['r gesucht', 'r = m·v²/F'],
+    ['m gesucht', 'm = F·r/v²'],
+    ['ω gesucht', 'ω = √(F/(m·r))'],
+    ['r fest', 'F ∼ m, F ∼ v²'],
+    ['v fest', 'F ∼ 1/r'],
+    ['ω fest', 'F ∼ r']
+  ]],
+  ['f-liefert', 'Was liefert F<sub>zp</sub>?', [
+    ['Faden (Hammerwerfer)', 'Fadenkraft'],
+    ['Kurve (eben)', 'Haftreibung <b>F<sub>R</sub> = μ·F<sub>N</sub> = μ·m·g</b>'],
+    ['Haftgrenze', 'm·v²/r = μ·m·g → <b>v = √(μ·g·r)</b>'],
+    ['Looping oben', 'Gewichtskraft (+ Normalkraft)'],
+    ['Looping min.', '<b>v = √(g·r)</b>'],
+    ['Senkr. Kreis oben', 'F = m·v²/r − m·g'],
+    ['Senkr. Kreis unten', 'F = m·v²/r + m·g'],
+    ['Himmelskörper', 'Gravitationskraft F<sub>G</sub>']
+  ]],
+  ['f-schein', 'Zentrifugal & Coriolis', [
+    ['Zentrifugalkraft', '<b>F<sub>Zf</sub> = m·v²/r = m·ω²·r</b>, nach außen, nur mitrotierend'],
+    ['Corioliskraft', '<b>F<sub>C</sub> = 2·m·v<sub>R</sub>·ω·sin φ</b>'],
+    ['v<sub>R</sub>', 'Relativgeschw. im rotierenden System'],
+    ['φ', 'Winkel zur Drehachse (z. B. geogr. Breite)']
+  ]],
+  ['f-grav', 'Gravitation', [
+    ['Gesetz', '<b>F<sub>G</sub> = G·m₁·m₂/r²</b> [N]'],
+    ['G', '6,674·10<sup>−11</sup> m³/(kg·s²)'],
+    ['r', 'Abstand der Schwerpunkte [m]'],
+    ['r gesucht', 'r = √(G·m₁·m₂/F<sub>G</sub>)'],
+    ['m₁ gesucht', 'm₁ = F<sub>G</sub>·r²/(G·m₂)'],
+    ['Gewichtskraft', '<b>m·g = G·m·M<sub>E</sub>/r²</b>'],
+    ['Ortsfaktor', '<b>g = G·M<sub>E</sub>/r²</b> (Boden 9,81 m/s²)'],
+    ['Masse aus g', 'M = g·R²/G'],
+    ['Masse aus Umlauf', '<b>M = 4π²·r³/(G·T²)</b>']
+  ]],
+  ['f-sat', 'Satellit', [
+    ['Ansatz', '<b>F<sub>G</sub> = F<sub>zp</sub></b>'],
+    ['ausgeschrieben', 'G·M<sub>E</sub>·m/r² = m·v²/r = m·ω²·r'],
+    ['Bahntempo', '<b>v = √(G·M<sub>E</sub>/r)</b>'],
+    ['Umlaufzeit', 'T = 2πr/v = 2π·√(r³/(G·M<sub>E</sub>))'],
+    ['Bahnradius', '<b>r = ∛(G·M<sub>E</sub>/ω²)</b> = ∛(G·M<sub>E</sub>·T²/(4π²))'],
+    ['Höhe', '<b>h = r − R<sub>E</sub></b>'],
+    ['Geostationär', 'T = 24 h, ω = 7,27·10<sup>−5</sup> 1/s'],
+    ['', 'r ≈ 42 200 km, h ≈ 35 800 km, v ≈ 3,1 km/s']
+  ]],
+  ['f-werte', 'Werte', [
+    ['Masse Erde M<sub>E</sub>', '5,97·10<sup>24</sup> kg'],
+    ['Radius Erde R<sub>E</sub>', '6370 km = 6,37·10<sup>6</sup> m'],
+    ['Masse Mond', '7,35·10<sup>22</sup> kg'],
+    ['Masse Sonne', '1,99·10<sup>30</sup> kg'],
+    ['Erde–Mond', '3,84·10<sup>8</sup> m'],
+    ['Sonne–Erde/Mond', '1,496·10<sup>11</sup> m'],
+    ['Mondumlauf', '27,3 d'],
+    ['g', '9,81 m/s²']
+  ]],
+  ['f-einheit', 'Umrechnen & Rechenweg', [
+    ['km → m', '· 1000'],
+    ['h → s', '· 3600'],
+    ['Tag → s', '· 86 400'],
+    ['km/h → m/s', '÷ 3,6'],
+    ['g → kg', '÷ 1000'],
+    ['U/min → Hz', '÷ 60'],
+    ['Grad → rad', '· π/180'],
+    ['Rechenweg', '1. gegeben/gesucht 2. Formel 3. umstellen 4. SI-Einheiten 5. einsetzen + Einheit'],
+    ['Satellit', 'Kräfte gleichsetzen, r = R<sub>E</sub> + h']
+  ]]
+];
+
+// ---------- Wissen (Fragen) ----------
+const WISSEN = [
+  ['w-kreis', 'Kreisbewegung', [
+    ['Was ist eine gleichförmige Kreisbewegung?', 'Bewegung auf einer Kreisbahn mit konstantem Betrag der Bahngeschwindigkeit v. Der Drehwinkel φ ändert sich zeitlich konstant → ω = konst.'],
+    ['Warum ist sie trotzdem eine beschleunigte Bewegung?', 'Die <b>Richtung</b> von v ändert sich ständig. Jede Änderung der Geschwindigkeit (auch nur der Richtung) ist eine Beschleunigung, hier a<sub>zp</sub> zum Mittelpunkt.'],
+    ['Wie sind v und a<sub>zp</sub> gerichtet?', 'v: tangential zur Kreisbahn. a<sub>zp</sub> und F<sub>zp</sub>: zum Kreismittelpunkt, senkrecht zu v.'],
+    ['Was ist die Winkelgeschwindigkeit ω?', 'Die zeitliche Änderung des Drehwinkels: ω = Δφ/Δt, Einheit 1/s. Eine Runde: φ = 2π → ω = 2π/T.'],
+    ['Zwei Punkte auf einem Karussell: wer ist schneller?', 'Gleiches ω und gleiches T. Der äußere Punkt hat den größeren Radius → größere Bahngeschwindigkeit (v = ω·r).']
+  ]],
+  ['w-zp', 'Zentripetalkraft', [
+    ['Was ist die Zentripetalkraft?', 'Die zum Kreismittelpunkt gerichtete <b>resultierende Kraft</b>, die einen Körper auf der Kreisbahn hält. F<sub>zp</sub> = m·v²/r = m·ω²·r.'],
+    ['Eigenschaften der Zentripetalkraft', '<ul><li>senkrecht zum Weg (zur Bewegungsrichtung)</li><li>verrichtet keine Arbeit, ändert die mechanische Energie nicht</li><li>ändert nur die Richtung von v, nicht den Betrag</li><li>umso größer, je größer v und m und je kleiner r</li><li>keine neue Kraftart</li><li>zu ihr gibt es eine Gegenkraft</li></ul>'],
+    ['Ist die Zentripetalkraft eine eigene Kraftart?', 'Nein. Jede Kraft kann sie liefern: Fadenkraft (Hammerwerfer), Gewichtskraft (Looping), Gravitationskraft (Himmelskörper), Haftreibungskraft (Kurvenfahrt).'],
+    ['Warum verrichtet F<sub>zp</sub> keine Arbeit?', 'Sie steht immer senkrecht zum Weg. Arbeit gibt es nur durch Kraft in Wegrichtung → v bleibt betragsmäßig gleich.'],
+    ['Was passiert, wenn der Faden reißt?', 'F<sub>zp</sub> fällt weg. Der Körper bewegt sich wegen seiner Trägheit tangential geradeaus weiter (für den ruhenden Beobachter). Danach kann z. B. die Schwerkraft die Bahn weiter verändern.'],
+    ['Was ist die Gegenkraft zur Zentripetalkraft und wo greift sie an?', 'Die Kraft, mit der der Körper am Faden/Mittelpunkt nach außen zieht (actio = reactio). F<sub>zp</sub> greift am Körper an, die Gegenkraft im Mittelpunkt (z. B. an der Hand).'],
+    ['Wie hängt die Bewegung von der Gesamtkraft ab?', 'Die resultierende Kraft beschleunigt den Körper in Richtung des Kraftvektors. Kraft ∥ v → schneller/langsamer auf gerader Bahn; Kraft ⊥ v → Kreisbahn; keine Kraft → gleichförmig geradeaus.'],
+    ['Warum hängt das Höchsttempo in der Kurve nicht von der Masse ab?', 'm·v²/r = μ·m·g: m steht auf beiden Seiten und kürzt sich → v<sub>max</sub> = √(μ·g·r).'],
+    ['Wo reißt der Faden im senkrechten Kreis am ehesten?', 'Unten. Dort muss der Faden F<sub>zp</sub> liefern <b>und</b> die Gewichtskraft tragen: F = m·v²/r + m·g.']
+  ]],
+  ['w-bezug', 'Bezugssysteme & Zentrifugalkraft', [
+    ['Was ist ein Inertialsystem?', 'Ein Bezugssystem, in dem das Trägheitsgesetz uneingeschränkt gilt: Ein Körper ohne Kraft bleibt in Ruhe oder bewegt sich gleichförmig geradlinig. Beobachter ruht („Sicht von außen“).'],
+    ['Was sieht der ruhende Beobachter (von außen)?', '<ul><li>die Kreisbewegung des Körpers</li><li>Körper bleibt durch die Zentripetalkraft auf der Bahn, es gibt eine Gegenkraft</li><li>ohne F<sub>zp</sub> → Körper fliegt tangential weiter</li></ul>'],
+    ['Was spürt der mitbewegte Beobachter (von innen)?', '<ul><li>sieht den Körper in Ruhe</li><li>spürt eine nach außen wirkende Zentrifugalkraft, zu ihr gibt es keine Gegenkraft</li><li>ohne F<sub>zp</sub> → Körper bewegt sich nach außen weg</li></ul>'],
+    ['Eigenschaften der Zentrifugalkraft', '<ul><li>wirkt radial nach außen, gleich groß wie F<sub>zp</sub>, entgegengesetzt</li><li>Schein- oder Trägheitskraft, keine Wechselwirkungskraft</li><li>existiert nur für den mitbewegten Beobachter</li><li>auch „Fliehkraft“</li><li>F<sub>Zf</sub> = m·v²/r = m·ω²·r</li></ul>'],
+    ['Zentrifugalkraft = Gegenkraft der Zentripetalkraft?', 'Nein! F<sub>Zf</sub> greift am Körper an und existiert nur im rotierenden System. Die Gegenkraft (actio = reactio) greift am Mittelpunkt an und existiert für den ruhenden Beobachter.'],
+    ['Wo greifen F<sub>zp</sub>, F<sub>Zf</sub> und die Gegenkraft an?', 'F<sub>zp</sub> und F<sub>Zf</sub> an der kreisenden Masse, die Gegenkraft im Mittelpunkt.'],
+    ['Beispiele für die Zentrifugalkraft', 'Die Erde ist durch ihre Drehung abgeplattet (Ellipsoid). Zentrifuge: trennt Stoffe unterschiedlicher Dichte. Wäscheschleuder, Kettenkarussell (Ketten schräg nach außen).']
+  ]],
+  ['w-cor', 'Corioliskraft', [
+    ['Was ist die Corioliskraft?', 'Eine Scheinkraft im rotierenden Bezugssystem: Ein Körper, der sich darin mit v<sub>R</sub> bewegt (z. B. geworfener Ball), wird für den mitbewegten Beobachter seitlich abgelenkt. Sie wirkt zusätzlich zur Zentrifugalkraft.'],
+    ['Formel und Richtung', 'F<sub>C</sub> = 2·m·v<sub>R</sub>·ω·sin φ. Wirkt senkrecht zur Drehachse und zur Relativgeschwindigkeit. φ = Winkel zwischen Drehachse und Masse (z. B. geogr. Breite).'],
+    ['Ballwurf auf dem Karussell', 'Ruhender Beobachter: Ball fliegt geradeaus, der Fänger dreht sich weg. Mitbewegter Beobachter: Ball beschreibt eine gekrümmte Bahn → Corioliskraft.'],
+    ['Beispiele für die Corioliskraft', 'Ablenkung der Passatwinde (Nordhalbkugel nach rechts), Foucault’sches Pendel (Schwingungsebene dreht sich scheinbar → Beweis der Erddrehung).']
+  ]],
+  ['w-grav', 'Gravitation', [
+    ['Was versteht man unter Gravitation?', 'Massenanziehung: Jeder Körper zieht wegen seiner Masse jeden anderen Körper an, entlang der Verbindungslinie der Schwerpunkte.'],
+    ['Wer hat das Gravitationsgesetz formuliert?', 'Isaac Newton (1643–1727), 1686: F<sub>G</sub> = G·m₁·m₂/r².'],
+    ['Ziehen sich ein schwerer und ein leichter Körper unterschiedlich stark an?', 'Nein. Beide Kräfte sind gleich groß und entgegengesetzt (Wechselwirkung), sie greifen an verschiedenen Körpern an. Der leichte Körper wird nur stärker beschleunigt.'],
+    ['Wie hängen Gewichtskraft und Gravitation zusammen?', 'Die Gravitationskraft der Erde auf einen Körper an der Oberfläche <b>ist</b> seine Gewichtskraft: m·g = G·m·M<sub>E</sub>/R<sub>E</sub>². Mit der Höhe nimmt sie ab.'],
+    ['Wie ändert sich F<sub>G</sub> mit dem Abstand?', 'F<sub>G</sub> ∼ 1/r²: doppelter Abstand → ¼, dreifacher → 1/9.'],
+    ['Grenzen des Newton’schen Gravitationsgesetzes', 'Nur Näherung für schwache Gravitationsfelder. Erklärt nicht die Periheldrehung des Merkur und die Lichtablenkung durch Gravitation.'],
+    ['Was beschreibt starke Gravitationsfelder?', 'Einsteins allgemeine Relativitätstheorie (z. B. Schwarze Löcher): Gravitation als Folge der Krümmung der Raumzeit durch große Massen.']
+  ]],
+  ['w-sem', 'Sonne, Erde, Mond & Gezeiten', [
+    ['Welche Rolle spielt die Sonne im Sonnensystem?', 'Sie dominiert mit ihrer Masse gravitativ das Sonnensystem. Ihre Gravitation hält die Planeten auf annähernd Kreisbahnen.'],
+    ['Wer zieht stärker am Mond: Sonne oder Erde?', 'Die Sonne, etwa 2,2-mal so stark: F<sub>SM</sub>/F<sub>EM</sub> = m<sub>S</sub>·r<sub>EM</sub>²/(m<sub>E</sub>·r<sub>SM</sub>²) ≈ 2,2.'],
+    ['Warum kreist der Mond dann um die Erde?', 'Der Mond würde auch ohne Erde auf einer „Kreisbahn“ um die Sonne laufen. Die Erdgravitation „stört“ diesen Umlauf und lenkt ihn ab. Diese Ablenkung ergibt die Bahn um die Erde.'],
+    ['Was sind Gezeiten?', 'Der durch die Gravitation von Mond und Sonne verursachte Zyklus von Ebbe und Flut auf den großen Gewässern der Erde.'],
+    ['Was ist eine Springtide?', 'Besonders hohe Flut (großer Tidenhub) bei Voll- und Neumond: Sonne, Erde und Mond auf einer Linie (Konjunktion/Opposition), Gravitationskräfte wirken in die gleiche Richtung.'],
+    ['Was ist eine Nipptide?', 'Besonders niedriger Tidenhub bei Halbmond: Sonne und Mond stehen von der Erde aus im 90°-Winkel, die Gezeitenkräfte wirken in verschiedene Richtungen.']
+  ]],
+  ['w-sat', 'Satelliten', [
+    ['Warum fällt ein Satellit nicht herunter?', 'Er „fällt“ ständig, ist aber so schnell, dass er an der Erde vorbeifällt: Die Gravitationskraft liefert genau die nötige Zentripetalkraft, F<sub>G</sub> = F<sub>zp</sub>.'],
+    ['Hängt die Bahngeschwindigkeit von der Satellitenmasse ab?', 'Nein. Die Satellitenmasse kürzt sich: v = √(G·M<sub>E</sub>/r). Nur der Bahnradius zählt.'],
+    ['Was bedeutet geostationär?', 'Der Satellit befindet sich immer über demselben Punkt der Erdoberfläche (über dem Äquator). Er hat dieselbe Winkelgeschwindigkeit und Drehrichtung wie die Erde: T = 24 h.'],
+    ['Wofür braucht man geostationäre Satelliten?', 'Kommunikation, z. B. Fernsehsatelliten: Die Antenne kann fest ausgerichtet bleiben.'],
+    ['Werte des geostationären Satelliten', 'ω = 2π/24 h = 7,27·10<sup>−5</sup> 1/s, r ≈ 42 200 km (vom Erdmittelpunkt), h ≈ 35 800 km, v = ω·r ≈ 3,1 km/s.'],
+    ['Häufigster Fehler bei Satellitenaufgaben?', 'Höhe h statt Bahnradius r einsetzen. Immer r = R<sub>E</sub> + h.']
+  ]]
+];
+
+// ---------- Rendering ----------
+const $ = s => document.querySelector(s);
+const kat = id => KATS.find(k => k.id === id);
+
+function renderAufgabe(parts) {
+  const el = $('#aufgabe');
+  const [, katId, typId] = parts;
+  if (typId) { renderTyp(el, TYPES.find(t => t.id === typId)); return; }
+  if (katId) {
+    const k = kat(katId);
+    if (katId === 'was') {
+      el.innerHTML = `<a class="back" href="#aufgabe">‹ Kategorien</a><h2>${k.i} ${k.t}</h2>
+        <div class="card rows">${WAS.map(([a, b]) => `<div class="row"><div class="p">${a}</div><div class="f">${b}</div></div>`).join('')}</div>`;
+      return;
+    }
+    el.innerHTML = `<a class="back" href="#aufgabe">‹ Kategorien</a><h2>${k.i} ${k.t}</h2>
+      <div class="list">${TYPES.filter(t => t.k === katId).map(t =>
+        `<a href="#aufgabe/${katId}/${t.id}"><b>${t.t}</b><small>${t.erk}</small></a>`).join('')}</div>`;
+    return;
+  }
+  el.innerHTML = `<h2>Worum geht’s in der Aufgabe?</h2>
+    <div class="tiles">${KATS.map(k =>
+      `<a href="#aufgabe/${k.id}"><span class="i">${k.i}</span><b>${k.t}</b><small>${k.s}</small></a>`).join('')}</div>`;
+}
+
+function renderTyp(el, t) {
+  if (!t) { location.hash = '#aufgabe'; return; }
+  const k = kat(t.k);
+  el.innerHTML = `<a class="back" href="#aufgabe/${t.k}">‹ ${k.t}</a>
+    <h2>${t.t}</h2>
+    <div class="card"><div class="tag">Erkennst du an</div><div class="erk">${t.erk}</div></div>
+    <div class="card"><div class="tag">Formel</div>${t.f.map((x, i) => `<div class="formel${i && t.f.length > 2 ? ' s' : ''}">${x}</div>`).join('')}
+      <div class="idee">${t.idee}</div></div>
+    <div class="card"><div class="tag">Gegeben (änderbar)</div><div class="inputs">${t.in.map(([key, lab, unit, def]) =>
+      `<label>${lab}${unit ? ' [' + unit + ']' : ''}<input inputmode="decimal" autocomplete="off" data-k="${key}" value="${String(def).replace('.', ',')}"></label>`).join('')}</div></div>
+    <div class="card"><div class="tag">Lösungsweg</div><div id="out"></div></div>`;
+  const run = () => {
+    const v = {}; let ok = true;
+    el.querySelectorAll('input[data-k]').forEach(i => { v[i.dataset.k] = parse(i.value); if (isNaN(v[i.dataset.k])) ok = false; });
+    const out = $('#out');
+    if (!ok) { out.innerHTML = '<div class="hint">Zahl eingeben, z. B. 5,97e24 für 5,97·10²⁴</div>'; return; }
+    const r = t.solve(v);
+    out.innerHTML = `<ol class="steps">${r.steps.map(s => `<li><div>${s}</div></li>`).join('')}</ol>
+      <div class="res">${r.res.map(s => `<span>${s}</span>`).join('')}</div>`;
+  };
+  el.addEventListener('input', run);
+  run();
+}
+
+function renderFormeln() {
+  $('#formeln').innerHTML = `<div class="jump">${FORMELN.map(([id, t]) => `<a href="#${id}">${t}</a>`).join('')}</div>` +
+    FORMELN.map(([id, t, rows]) => `<h2 id="${id}">${t}</h2><div class="card rows">${rows.map(([p, f]) =>
+      `<div class="row"><div class="p">${p}</div><div class="f">${f}</div></div>`).join('')}</div>`).join('') +
+    `<a class="pdf" href="a4-formelblatt.pdf">📄 A4-Formelblatt (PDF)</a>`;
+}
+
+function renderWissen() {
+  $('#wissen').innerHTML = `<div class="jump">${WISSEN.map(([id, t]) => `<a href="#${id}">${t}</a>`).join('')}</div>` +
+    WISSEN.map(([id, t, qs]) => `<h2 id="${id}">${t}</h2>${qs.map(([q, a]) =>
+      `<details><summary><span>${q}</span></summary><div class="a">${a}</div></details>`).join('')}`).join('');
+}
+
+function route() {
+  const h = decodeURIComponent(location.hash.slice(1)) || 'aufgabe';
+  let tab = h.split('/')[0];
+  let anchor = null;
+  if (tab.startsWith('f-')) { anchor = tab; tab = 'formeln'; }
+  else if (tab.startsWith('w-')) { anchor = tab; tab = 'wissen'; }
+  if (!['aufgabe', 'formeln', 'wissen'].includes(tab)) tab = 'aufgabe';
+  document.querySelectorAll('section').forEach(s => s.hidden = s.id !== tab);
+  document.querySelectorAll('nav.tabs a').forEach(a => a.setAttribute('aria-current', a.dataset.tab === tab));
+  if (tab === 'aufgabe') {
+    const old = $('#aufgabe'); const fresh = old.cloneNode(false); old.replaceWith(fresh);
+    renderAufgabe(h.split('/'));
+    window.scrollTo(0, 0);
+  } else if (anchor) {
+    const t = document.getElementById(anchor); if (t) t.scrollIntoView();
+  } else window.scrollTo(0, 0);
+}
+
+renderFormeln();
+renderWissen();
+window.addEventListener('hashchange', route);
+route();
+</script>
+</body>
+</html>
